@@ -1,0 +1,3 @@
+[daemons.socktainer]
+run = "/opt/socktainer/bin/socktainer"
+ready_output = "Server started on"
