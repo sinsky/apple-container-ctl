@@ -88,6 +88,51 @@ Run this script after finishing Docker tasks to cleanly shut down services and r
 
 ---
 
+### (D) Global Shell Wrapper (`container-ctl`)
+To control and inspect services from any directory without changing into the repository folder, add the following helper function to your `~/.zshrc`:
+
+```zsh
+container-ctl() {
+  # ⚠️ Update this path to match the location where you cloned this repository
+  local repo="${CONTAINER_CTL_DIR:-$HOME/path/to/container-ctl}"
+  local cmd="${1:-}"
+
+  case "$cmd" in
+    start|stop|check)
+      "$repo/${cmd}.sh"
+      ;;
+    status)
+      container system status 2>/dev/null || echo "Apple Container stopped."
+      echo
+      (cd "$repo" && mise exec -- pitchfork status socktainer) 2>/dev/null || echo "Socktainer stopped."
+      ;;
+    logs)
+      (cd "$repo" && mise exec -- pitchfork logs socktainer)
+      ;;
+    help|-h|--help)
+      echo "container-ctl [start|stop|check|status|logs|help]"
+      ;;
+    *)
+      "$repo/manage.sh" "$@"
+      ;;
+  esac
+}
+```
+
+> [!NOTE]
+> Replace `"$HOME/path/to/container-ctl"` with the actual directory where you cloned `container-ctl` (e.g., `"$HOME/Desktop/GitHub/container-ctl"`, `"$HOME/projects/container-ctl"`), or set the `CONTAINER_CTL_DIR` environment variable in your shell configuration.
+
+**Available Subcommands**:
+- `container-ctl` (no arguments) : Launches the interactive TUI dashboard (`manage.sh`).
+- `container-ctl start` : Initializes Apple Container and starts `socktainer` in the background (`start.sh`).
+- `container-ctl stop` : Gracefully shuts down `socktainer` and Apple Container (`stop.sh`).
+- `container-ctl status` : Displays Apple Container system status and `socktainer` daemon status.
+- `container-ctl logs` : Shows recent `socktainer` daemon logs via `pitchfork`.
+- `container-ctl check` : Verifies CLI tool installations (`check.sh`).
+- `container-ctl help` : Displays command usage help.
+
+---
+
 ## ⚙️ 4. `pitchfork.toml` Configuration Details
 
 `socktainer` is configured in `pitchfork.toml` as follows:
